@@ -18,7 +18,7 @@ jobs:
         uses: dkershner6/vercel-set-env-action@v1
         with:
           token: ${{ secrets.VERCEL_TOKEN }}
-          projectName: events-app
+          projectName: client
           envVariableKeys: CLIENT_EMAIL,PRIVATE_KEY,SPREADSHEET_ID
         env:
           CLIENT_EMAIL: ${{ secrets.CLIENT_EMAIL }}
