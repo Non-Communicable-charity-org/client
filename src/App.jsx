@@ -9,6 +9,7 @@ function App() {
 	return (
 		<>
 			<h1>Non-Communicable Diseases Charity</h1>
+			Non-Communicable Diseases Charity
 		</>
 	);
 }
