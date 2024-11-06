@@ -1,0 +1,49 @@
+name: Pull Request and Merge Workflow
+
+on:
+  pull_request:
+    branches:
+      - main  # Trigger for PRs targeting the main branch
+
+  push:
+    branches:
+      - main  # Trigger on pushes to main for merge
+
+jobs:
+  pr_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Optional: Add a PR comment
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "PR opened for review on the main branch."
+
+  auto_merge:
+    runs-on: ubuntu-latest
+    needs: pr_check
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Attempt to Merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Attempt to merge main into the branch
+          git fetch origin main
+          git checkout ${{ github.head_ref }}
+          git merge origin/main || echo "Merge conflicts detected, please resolve manually."
+
+      - name: Push Merge Changes
+        if: success()  # This only pushes if there were no conflicts
+        run: |
+          git push origin ${{ github.head_ref }}
