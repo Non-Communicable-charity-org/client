@@ -3,15 +3,26 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  contents: write  # Required to post comments and update PRs
+  pull-requests: write  # Allows posting comments on PRs
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: amondnet/vercel-action@v20
+        id: vercel-deploy
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.ORG_ID}}
-          vercel-project-id: ${{ secrets.PROJECT_ID}}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+      - name: Set preview URL
+        run: |
+          echo "preview-url=${{ steps.vercel-deploy.outputs.preview-url }}" >> $GITHUB_ENV
+      - name: Output preview URL
+        run: |
+          echo "Preview URL: ${{ env.preview-url }}"
