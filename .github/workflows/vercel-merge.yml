@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write  # Ensure write permissions for commenting on pull requests
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -23,7 +26,7 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID }}
           vercel-project-id: ${{ secrets.PROJECT_ID }}
 
-      - name: Output Production URL
+      - name: Set Preview URL
         if: success()
         run: |
-          echo "Deployment successful. Production URL: ${{ steps.vercel-deploy.outputs.url }}"
+          echo "preview-url=https://your-deployment-url" >> $GITHUB_ENV
