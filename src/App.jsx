@@ -6,7 +6,7 @@ import "./App.css";
 function App() {
 	const [count, setCount] = useState(0);
 
-	return <>Non-Communicable Diseases Charity hello world</>;
+	return <>Non-Communicable Diseases Charity</>;
 }
 
 export default App;
