@@ -1,28 +1,46 @@
-name: Deploy to vercel on merge
+name: Deploy to Vercel on merge
+
 on:
   push:
     branches:
       - main
 
-permissions:
-  contents: write  # Required to post comments and update PRs
-  pull-requests: write  # Allows posting comments on PRs
-
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: amondnet/vercel-action@v20
-        id: vercel-deploy
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set environment variables securely
+      - name: Set Vercel environment variables
+        uses: dkershner6/vercel-set-env-action@v1
+        with:
+          token: ${{ secrets.VERCEL_TOKEN }}
+          projectName: events-app
+          envVariableKeys: CLIENT_EMAIL,PRIVATE_KEY,SPREADSHEET_ID
+        env:
+          CLIENT_EMAIL: ${{ secrets.CLIENT_EMAIL }}
+          TARGET_CLIENT_EMAIL: preview,development,production
+          TYPE_CLIENT_EMAIL: encrypted
+
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          TARGET_PRIVATE_KEY: preview,development,production
+          TYPE_PRIVATE_KEY: encrypted
+
+          SPREADSHEET_ID: ${{ secrets.EVENTS_APP_SPREADSHEET_ID }}
+          TARGET_SPREADSHEET_ID: preview,development,production
+          TYPE_SPREADSHEET_ID: encrypted
+
+      # Deploy to Vercel using the Vercel Action
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: '--prod'
           vercel-org-id: ${{ secrets.ORG_ID }}
           vercel-project-id: ${{ secrets.PROJECT_ID }}
-      - name: Set preview URL
-        run: |
-          echo "preview-url=${{ steps.vercel-deploy.outputs.preview-url }}" >> $GITHUB_ENV
-      - name: Output preview URL
-        run: |
-          echo "Preview URL: ${{ env.preview-url }}"
+          scope: ${{ secrets.ORG_ID }}  # Ensure it's scoped to your Vercel organization
+
